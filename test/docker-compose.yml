@@ -36,7 +36,12 @@ services:
     working_dir: /app
     networks:
       - deep-maria-net
-    command: tail -f /dev/null
+    command: >
+      bash -c "
+        if [ -f requirements.txt ]; then
+          pip install -r requirements.txt
+        fi &&
+        tail -f /dev/null
     healthcheck:
       test: ["CMD", "python", "-c", "import sys; sys.exit(0)"]
       interval: 30s
