@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Setup script for Docker Compose environment.
-This script ensures Docker Compose is installed, .env file exists,
+This script ensures Docker is installed, .env file exists,
 and runs the Docker Compose configuration.
 """
 
@@ -12,10 +12,34 @@ import shutil
 import pathlib
 
 
-def check_docker_compose():
-    """Check if Docker Compose is installed and available."""
+def check_docker():
+    """Check if Docker is installed and available."""
     try:
-        # Try the docker compose command (Docker Compose V2)
+        result = subprocess.run(
+            ["docker", "--version"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            check=False
+        )
+        
+        if result.returncode == 0:
+            print("✅ Docker is installed")
+            return True
+            
+        print("❌ Docker is not installed")
+        print("Please install Docker: https://docs.docker.com/get-docker/")
+        return False
+        
+    except Exception as e:
+        print(f"❌ Error checking Docker: {e}")
+        return False
+
+
+def check_docker_compose():
+    """Check if Docker Compose is available."""
+    # First try Docker Compose V2 (part of Docker CLI as 'docker compose')
+    try:
         result = subprocess.run(
             ["docker", "compose", "version"],
             stdout=subprocess.PIPE,
@@ -25,10 +49,13 @@ def check_docker_compose():
         )
         
         if result.returncode == 0:
-            print("✅ Docker Compose V2 is installed")
+            print("✅ Docker Compose (V2) is available")
             return True
+    except Exception:
+        pass
             
-        # If V2 fails, try the docker-compose command (Docker Compose V1)
+    # Try standalone Docker Compose (V1)
+    try:
         result = subprocess.run(
             ["docker-compose", "--version"],
             stdout=subprocess.PIPE,
@@ -38,16 +65,14 @@ def check_docker_compose():
         )
         
         if result.returncode == 0:
-            print("✅ Docker Compose V1 is installed")
+            print("✅ Docker Compose (V1) is available")
             return True
-            
-        print("❌ Docker Compose is not installed")
-        print("Please install Docker Compose: https://docs.docker.com/compose/install/")
-        return False
+    except Exception:
+        pass
         
-    except Exception as e:
-        print(f"❌ Error checking Docker Compose: {e}")
-        return False
+    print("❌ Docker Compose is not available")
+    print("Please install Docker Compose: https://docs.docker.com/compose/install/")
+    return False
 
 
 def ensure_env_file():
@@ -117,6 +142,11 @@ def run_docker_compose():
 
 def main():
     """Main function to run the setup process."""
+    # Check for Docker first
+    if not check_docker():
+        sys.exit(1)
+    
+    # Check for Docker Compose (needed because older Docker versions don't include Compose)
     if not check_docker_compose():
         sys.exit(1)
         
