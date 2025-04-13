@@ -13,6 +13,7 @@ services:
     restart: unless-stopped
     volumes:
       - ${MARIADB_CONFIG_PATH:-../mariadb/conf.d}:/etc/mysql
+      - ${MARIADB_INIT_PATH:-../mariadb/init}:/docker-entrypoint-initdb.d
     networks:
       - deep-maria-net
     healthcheck:
