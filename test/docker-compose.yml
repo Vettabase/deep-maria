@@ -13,8 +13,7 @@ services:
     container_name: deep-maria-db
     environment: *db-credentials
     volumes:
-      - ${MARIADB_CONF_PATH:-../mariadb/conf.d}:/etc/mysql/conf.d
-      - ${MARIADB_CONFIG_FILE:-../mariadb/my.cnf}:/etc/mysql/my.cnf
+      - ${MARIADB_CONFIG_PATH:-../mariadb/conf.d}:/etc/mysql
     networks:
       - deep-maria-net
 
