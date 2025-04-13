@@ -13,12 +13,14 @@ import pathlib
 from enum import Enum
 
 class severity(Enum):
-    INFO     = 1
-    WARN     = 2
-    FATAL    = 3
+    COOL     = 1
+    INFO     = 2
+    WARN     = 3
+    FATAL    = 4
 
 def show_message(severity, message):
     marker = {
+        severity.COOL:     "🚀",
         severity.INFO:     "✅",
         severity.WARN:     "⚠️",
         severity.FATAL:    "❌"
