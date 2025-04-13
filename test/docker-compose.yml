@@ -14,6 +14,12 @@ services:
       - ${MARIADB_CONFIG_PATH:-../mariadb/conf.d}:/etc/mysql
     networks:
       - deep-maria-net
+    healthcheck:
+      test: ["CMD", "mariadb-admin", "ping", "-h", "localhost", "-u", "root", "--password=${MYSQL_ROOT_PASSWORD}"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
 
   deep-maria-app:
     image: python:3
@@ -25,6 +31,12 @@ services:
     networks:
       - deep-maria-net
     command: tail -f /dev/null
+    healthcheck:
+      test: ["CMD", "python", "-c", "import sys; sys.exit(0)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
 
 networks:
   deep-maria-net:
