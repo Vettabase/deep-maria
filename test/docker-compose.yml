@@ -27,6 +27,9 @@ services:
     container_name: deep-maria-app
     environment: *db-credentials
     restart: unless-stopped
+    depends_on:
+      deep-maria-db:
+        condition: service_healthy
     volumes:
       - ${PYTHON_APP_PATH:-../python}:/app
     working_dir: /app
