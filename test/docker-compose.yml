@@ -1,5 +1,3 @@
-version: '3.8'
-
 # Define common environment variables
 x-environment: &db-credentials
   MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
