@@ -10,7 +10,20 @@ import sys
 import subprocess
 import shutil
 import pathlib
+from enum import Enum
 
+class severity(Enum):
+    INFO     = 1
+    WARN     = 2
+    FATAL    = 3
+
+def show_message(severity, message):
+    marker = {
+        severity.INFO:     "✅",
+        severity.WARN:     "⚠️",
+        severity.FATAL:    "❌"
+    }
+    print(f"{marker} {message}")
 
 def check_docker():
     """Check if Docker is installed and available."""
