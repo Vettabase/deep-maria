@@ -18,22 +18,10 @@ import subprocess
 import shutil
 import pathlib
 import argparse
-from enum import Enum
 
-class severity(Enum):
-    COOL     = 1
-    INFO     = 2
-    WARN     = 3
-    FATAL    = 4
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../python_libs')))
+from messages import Severity, show_message
 
-def show_message(severity, message):
-    marker = {
-        severity.COOL:     "🚀",
-        severity.INFO:     "✅",
-        severity.WARN:     "⚠️",
-        severity.FATAL:    "❌"
-    }
-    print(f"{marker[severity]} {message}")
 
 def check_docker():
     """Check if Docker is installed and available."""
