@@ -35,15 +35,15 @@ def check_docker():
         )
         
         if result.returncode == 0:
-            show_message(severity.INFO, "Docker is installed")
+            show_message(Severity.INFO, "Docker is installed")
             return True
             
-        show_message(severity.FATAL, "Docker is not installed")
+        show_message(Severity.FATAL, "Docker is not installed")
         print("Please install Docker: https://docs.docker.com/get-docker/")
         return False
         
     except Exception as e:
-        show_message(severity.FATAL, f"Error checking Docker: {e}")
+        show_message(Severity.FATAL, f"Error checking Docker: {e}")
         return False
 
 
@@ -60,7 +60,7 @@ def check_docker_compose():
         )
         
         if result.returncode == 0:
-            show_message(severity.INFO, "Docker Compose (V2) is available")
+            show_message(Severity.INFO, "Docker Compose (V2) is available")
             return True, ["docker", "compose"]
     except Exception:
         pass
@@ -76,12 +76,12 @@ def check_docker_compose():
         )
         
         if result.returncode == 0:
-            show_message(severity.INFO, "Docker Compose (V1) is available")
+            show_message(Severity.INFO, "Docker Compose (V1) is available")
             return True, ["docker-compose"]
     except Exception:
         pass
         
-    show_message(severity.FATAL, "Docker Compose is not available")
+    show_message(Severity.FATAL, "Docker Compose is not available")
     print("Please install Docker Compose: https://docs.docker.com/compose/install/")
     return False, None
 
@@ -92,26 +92,26 @@ def clean_environment(compose_cmd, remove_env=False):
     script_dir = pathlib.Path(__file__).parent.absolute()
     
     try:
-        show_message(severity.WARN, "Cleaning up Docker environment...")
+        show_message(Severity.WARN, "Cleaning up Docker environment...")
         result = subprocess.run(
             compose_cmd + ["-f", str(script_dir / "docker-compose.yml"), "down", "--remove-orphans", "-v"],
             check=False
         )
         
         if result.returncode == 0:
-            show_message(severity.INFO, "Docker environment cleaned successfully")
+            show_message(Severity.INFO, "Docker environment cleaned successfully")
         else:
-            show_message(severity.WARN, f"Docker environment cleanup exited with code: {result.returncode}")
+            show_message(Severity.WARN, f"Docker environment cleanup exited with code: {result.returncode}")
         
         # Remove .env file if force-clean option is used
         if remove_env:
             env_file = script_dir / ".env"
             if env_file.exists():
                 env_file.unlink()
-                show_message(severity.INFO, ".env file removed")
+                show_message(Severity.INFO, ".env file removed")
     
     except Exception as e:
-        show_message(severity.WARN, f"Error during cleanup: {e}")
+        show_message(Severity.WARN, f"Error during cleanup: {e}")
 
 
 def ensure_env_file():
@@ -122,21 +122,21 @@ def ensure_env_file():
     env_example = script_dir / ".env.example"
 
     if env_file.exists():
-        show_message(severity.INFO, ".env file exists")
+        show_message(Severity.INFO, ".env file exists")
         return True
     
     if not env_example.exists():
-        show_message(severity.FATAL, "Neither .env nor .env.example file found")
+        show_message(Severity.FATAL, "Neither .env nor .env.example file found")
         return False
     
     try:
         # Copy .env.example to .env
         shutil.copy2(env_example, env_file)
-        show_message(severity.INFO, "Created .env file from .env.example")
-        show_message(severity.WARN, "You may want to edit .env file to customize settings")
+        show_message(Severity.INFO, "Created .env file from .env.example")
+        show_message(Severity.WARN, "You may want to edit .env file to customize settings")
         return True
     except Exception as e:
-        show_message(severity.FATAL, f"Error creating .env file: {e}")
+        show_message(Severity.FATAL, f"Error creating .env file: {e}")
         return False
 
 
@@ -147,21 +147,21 @@ def run_docker_compose(compose_cmd):
     
     try:
         # Run docker-compose up with detached mode
-        show_message(severity.COOL, "Starting Docker containers...")
+        show_message(Severity.COOL, "Starting Docker containers...")
         result = subprocess.run(
             compose_cmd + ["-f", str(script_dir / "docker-compose.yml"), "up", "-d"],
             check=False
         )
         
         if result.returncode == 0:
-            show_message(severity.INFO, "Docker containers started successfully")
+            show_message(Severity.INFO, "Docker containers started successfully")
             return True
         else:
-            show_message(severity.FATAL, f"Failed to start Docker containers (exit code: {result.returncode})")
+            show_message(Severity.FATAL, f"Failed to start Docker containers (exit code: {result.returncode})")
             return False
             
     except Exception as e:
-        show_message(severity.FATAL, f"Error running Docker Compose: {e}")
+        show_message(Severity.FATAL, f"Error running Docker Compose: {e}")
         return False
 
 
@@ -200,7 +200,7 @@ def main():
     if not run_docker_compose(compose_cmd):
         sys.exit(1)
     
-    show_message(severity.INFO, "Setup completed successfully")
+    show_message(Severity.INFO, "Setup completed successfully")
     sys.exit(0)
 
 
