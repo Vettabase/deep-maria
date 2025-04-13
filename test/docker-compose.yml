@@ -10,6 +10,7 @@ services:
     image: mariadb:11.4
     container_name: deep-maria-db
     environment: *db-credentials
+    restart: unless-stopped
     volumes:
       - ${MARIADB_CONFIG_PATH:-../mariadb/conf.d}:/etc/mysql
     networks:
@@ -25,6 +26,7 @@ services:
     image: python:3
     container_name: deep-maria-app
     environment: *db-credentials
+    restart: unless-stopped
     volumes:
       - ${PYTHON_APP_PATH:-../python}:/app
     working_dir: /app
