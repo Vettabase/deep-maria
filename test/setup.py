@@ -203,11 +203,6 @@ def main():
     # Handle clean and force-clean options
     if args.clean or args.force_clean:
         clean_environment(compose_cmd, remove_env=args.force_clean)
-        
-        # If only cleaning, exit after cleanup
-        if args.clean and not args.force_clean:
-            show_message(severity.INFO, "Cleanup complete")
-            sys.exit(0)
     
     # For normal setup or after force-clean, ensure .env exists
     if not ensure_env_file():
