@@ -127,8 +127,8 @@ class Messages():
             severity_level = self.defaults["severity_level"]
         if style is None:
             style = self.defaults["style"]
-        if not style isinstance(style, Styles):
-            print(f"⚠️ Invalid style: {style}")
+        if not isinstance(style, Styles):
+            raise  Exception(f"Invalid style: {style}")
         # If the specified severity_level doesn't exist,
         # we'll print a warning and then we print the message as is.
         if severity_level not in self.severity.levels:
