@@ -25,7 +25,7 @@ def show_message(severity, message):
         severity.WARN:     "⚠️",
         severity.FATAL:    "❌"
     }
-    print(f"{marker} {message}")
+    print(f"{marker[severity]} {message}")
 
 def check_docker():
     """Check if Docker is installed and available."""
@@ -39,15 +39,15 @@ def check_docker():
         )
         
         if result.returncode == 0:
-            print("✅ Docker is installed")
+            show_message(severity.INFO, "Docker is installed")
             return True
             
-        print("❌ Docker is not installed")
-        print("Please install Docker: https://docs.docker.com/get-docker/")
+        show_message(severity.FATAL, "Docker is not installed")
+        show_message(severity.INFO, "Please install Docker: https://docs.docker.com/get-docker/")
         return False
         
     except Exception as e:
-        print(f"❌ Error checking Docker: {e}")
+        show_message(severity.FATAL, f"Error checking Docker: {e}")
         return False
 
 
@@ -64,7 +64,7 @@ def check_docker_compose():
         )
         
         if result.returncode == 0:
-            print("✅ Docker Compose (V2) is available")
+            show_message(severity.INFO, "Docker Compose (V2) is available")
             return True
     except Exception:
         pass
@@ -80,13 +80,13 @@ def check_docker_compose():
         )
         
         if result.returncode == 0:
-            print("✅ Docker Compose (V1) is available")
+            show_message(severity.INFO, "Docker Compose (V1) is available")
             return True
     except Exception:
         pass
         
-    print("❌ Docker Compose is not available")
-    print("Please install Docker Compose: https://docs.docker.com/compose/install/")
+    show_message(severity.FATAL, "Docker Compose is not available")
+    show_message(severity.INFO, "Please install Docker Compose: https://docs.docker.com/compose/install/")
     return False
 
 
@@ -98,21 +98,21 @@ def ensure_env_file():
     env_example = script_dir / ".env.example"
 
     if env_file.exists():
-        print("✅ .env file exists")
+        show_message(severity.INFO, ".env file exists")
         return True
     
     if not env_example.exists():
-        print("❌ Neither .env nor .env.example file found")
+        show_message(severity.FATAL, "Neither .env nor .env.example file found")
         return False
     
     try:
         # Copy .env.example to .env
         shutil.copy2(env_example, env_file)
-        print("✅ Created .env file from .env.example")
-        print("⚠️  You may want to edit .env file to customize settings")
+        show_message(severity.INFO, "Created .env file from .env.example")
+        show_message(severity.WARN, "You may want to edit .env file to customize settings")
         return True
     except Exception as e:
-        print(f"❌ Error creating .env file: {e}")
+        show_message(severity.FATAL, f"Error creating .env file: {e}")
         return False
 
 
@@ -137,21 +137,21 @@ def run_docker_compose():
     
     try:
         # Run docker-compose up with detached mode
-        print("🚀 Starting Docker containers...")
+        show_message(severity.COOL, "Starting Docker containers...")
         result = subprocess.run(
             compose_cmd + ["-f", str(script_dir / "docker-compose.yml"), "up", "-d"],
             check=False
         )
         
         if result.returncode == 0:
-            print("✅ Docker containers started successfully")
+            show_message(severity.INFO, "Docker containers started successfully")
             return True
         else:
-            print(f"❌ Failed to start Docker containers (exit code: {result.returncode})")
+            show_message(severity.FATAL, f"Failed to start Docker containers (exit code: {result.returncode})")
             return False
             
     except Exception as e:
-        print(f"❌ Error running Docker Compose: {e}")
+        show_message(severity.FATAL, f"Error running Docker Compose: {e}")
         return False
 
 
@@ -171,7 +171,7 @@ def main():
     if not run_docker_compose():
         sys.exit(1)
         
-    print("✅ Setup completed successfully")
+    show_message(severity.INFO, "Setup completed successfully")
     sys.exit(0)
 
 

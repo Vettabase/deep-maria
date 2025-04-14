@@ -1,9 +1,9 @@
 # Define common environment variables
 x-environment: &db-credentials
-  MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-  MYSQL_DATABASE: ${MYSQL_DATABASE}
-  MYSQL_USER: ${MYSQL_USER}
-  MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+  MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
+  MARIADB_DATABASE: ${MARIADB_DATABASE}
+  MARIADB_USER: ${MARIADB_USER}
+  MARIADB_PASSWORD: ${MARIADB_PASSWORD}
 
 services:
   deep-maria-db:
@@ -13,10 +13,11 @@ services:
     restart: unless-stopped
     volumes:
       - ${MARIADB_CONFIG_PATH:-../mariadb/conf.d}:/etc/mysql
+      - ${MARIADB_INIT_PATH:-../mariadb/init}:/docker-entrypoint-initdb.d
     networks:
       - deep-maria-net
     healthcheck:
-      test: ["CMD", "mariadb-admin", "ping", "-h", "localhost", "-u", "root", "--password=${MYSQL_ROOT_PASSWORD}"]
+      test: ["CMD", "mariadb-admin", "ping", "-h", "localhost", "-u", "root", "--password=${MARIADB_ROOT_PASSWORD}"]
       interval: 30s
       timeout: 5s
       retries: 3
@@ -28,14 +29,16 @@ services:
     environment: *db-credentials
     restart: unless-stopped
     depends_on:
-      deep-maria-db:
-        condition: service_healthy
+      - deep-maria-db
+      # This sometimes fails on containers creation because
+      # it doesn't keep MariaDB's healthcheck's start_time into account
+      # condition: service_healthy
     volumes:
       - ${PYTHON_APP_PATH:-../python}:/app
     working_dir: /app
     networks:
       - deep-maria-net
-    command: tail -f /dev/null
+    command: bash -c "if [ -f requirements.txt ]; then pip install -r requirements.txt; fi && tail -f /dev/null"
     healthcheck:
       test: ["CMD", "python", "-c", "import sys; sys.exit(0)"]
       interval: 30s
