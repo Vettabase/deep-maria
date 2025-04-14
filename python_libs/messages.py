@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import sys
 from enum import Enum
 from types import MappingProxyType
 
@@ -49,7 +50,7 @@ class Severity():
         'COOL':     {"icon": "🚀", "label": "[INFO] ",    "color": "GREEN"},
         'INFO':     {"icon": "✅", "label": "[INFO] ",    "color": "NONE"},
         'WARN':     {"icon": "⚠️", "label": "[WARNING] ", "color": "YELLOW"},
-        'FATAL':    {"icon": "❌", "label": "[FATAL] ",   "color": "RED"}
+        'FATAL':    {"icon": "❌", "label": "[FATAL] ",   "color": "RED",   "exit_code": 1}
     }
 
     def __new__(cls):
@@ -61,8 +62,12 @@ class Severity():
 
         return instance
 
-    def add_level(self, id, icon, label, color):
+    def add_level(self, id, icon, label, color, exit_code=None):
         self.levels[id] = {"icon": icon, "label": label, "color": color}
+        if exit_code is not None:
+            if not isinstance(exit_code, int):
+                raise Exception("exit_code, if specified, must be an integer")
+            self.levels[id]['exit_code'] = exit_code
 
     def remove_level(self, id):
         del self.levels[id]
@@ -129,6 +134,9 @@ class Messages():
             print(message)
             return False
         else:
-            # The message should be properly handled based on its security_level
+            # The message should be properly handled based on its security_level.
+            # If the security level has an "exit_code" property, we're exiting the process
             self.print_message(message, severity_level, style)
+            if "exit_code" in self.severity.levels[severity_level]:
+                sys.exit(self.severity.levels[severity_level]["exit_code"])
             return True
