@@ -88,17 +88,18 @@ class Messages():
         "style": Styles.ICONS
     }
 
-    def __new__(cls):
+    def __new__(cls, severity=None):
         if cls._instance_created:
             raise Exception("Messages is a singleton")
 
         cls._instance_created = True
         instance = super(Messages, cls).__new__(cls)
+        instance.severity = severity
 
         return instance
 
-    def __init__(self, severity):
-        self.severity = severity
+    #def __init__(self, severity):
+    #    self.severity = severity
 
     def print_message(self, message, severity_level, style):
         if style == Styles.PLAIN:
