@@ -5,15 +5,33 @@ from types import MappingProxyType
 
 class Colors():
     _COLORS = {
+        # Special values
         "NONE": "",
         "RESET": "\033[0m",
-        "GREEN": "\033[92m",
-        "YELLOW": "\033[93m",
-        "RED": "\033[91m"
+        
+        # Regular colors
+        "BLACK": "\033[30m",
+        "RED": "\033[31m",
+        "GREEN": "\033[32m",
+        "YELLOW": "\033[33m",
+        "BLUE": "\033[34m",
+        "MAGENTA": "\033[35m",
+        "CYAN": "\033[36m",
+        "WHITE": "\033[37m",
+        
+        # Bright colors
+        "BRIGHT_BLACK": "\033[90m",   # Gray
+        "BRIGHT_RED": "\033[91m",
+        "BRIGHT_GREEN": "\033[92m",
+        "BRIGHT_YELLOW": "\033[93m",
+        "BRIGHT_BLUE": "\033[94m",
+        "BRIGHT_MAGENTA": "\033[95m",
+        "BRIGHT_CYAN": "\033[96m",
+        "BRIGHT_WHITE": "\033[97m"
     }
-
+    
     COLORS = MappingProxyType(_COLORS)
-
+    
     @classmethod
     def getCode(cls, name):
         if name not in cls.COLORS:
@@ -26,12 +44,22 @@ class Styles(Enum):
     ICONS   = 2
 
 class Severity():
+    _instance_created = False
     levels = {
         'COOL':     {"icon": "🚀", "label": "[INFO] ",    "color": "GREEN"},
         'INFO':     {"icon": "✅", "label": "[INFO] ",    "color": "NONE"},
         'WARN':     {"icon": "⚠️", "label": "[WARNING] ", "color": "YELLOW"},
         'FATAL':    {"icon": "❌", "label": "[FATAL] ",   "color": "RED"}
     }
+
+    def __new__(cls):
+        if cls._instance_created:
+            raise Exception("Severity is a singleton")
+
+        cls._instance_created = True
+        instance = super(Severity, cls).__new__(cls)
+
+        return instance
 
     def add_level(self, id, icon, label, color):
         self.levels[id] = {"icon": icon, "label": label, "color": color}
@@ -54,10 +82,20 @@ class Severity():
         return Messages.defaults["severity_level"]
 
 class Messages():
+    _instance_created = False
     defaults = {
         "severity_level": 'INFO',
         "style": Styles.ICONS
     }
+
+    def __new__(cls):
+        if cls._instance_created:
+            raise Exception("Severity is a singleton")
+
+        cls._instance_created = True
+        instance = super(Messages, cls).__new__(cls)
+
+        return instance
 
     def __init__(self, severity):
         self.severity = severity
