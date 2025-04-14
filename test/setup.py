@@ -20,8 +20,9 @@ import pathlib
 import argparse
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../python_libs')))
-from messages import Severity, show_message
+from messages import Severity, Messages
 
+messages = Messages()
 
 def check_docker():
     """Check if Docker is installed and available."""
@@ -35,15 +36,15 @@ def check_docker():
         )
         
         if result.returncode == 0:
-            show_message(Severity.INFO, "Docker is installed")
+            messages.show_message("Docker is installed", Severity.INFO)
             return True
             
-        show_message(Severity.FATAL, "Docker is not installed")
+        messages.show_message("Docker is not installed", Severity.FATAL)
         print("Please install Docker: https://docs.docker.com/get-docker/")
         return False
         
     except Exception as e:
-        show_message(Severity.FATAL, f"Error checking Docker: {e}")
+        messages.show_message(f"Error checking Docker: {e}", Severity.FATAL)
         return False
 
 
@@ -60,7 +61,7 @@ def check_docker_compose():
         )
         
         if result.returncode == 0:
-            show_message(Severity.INFO, "Docker Compose (V2) is available")
+            messages.show_message("Docker Compose (V2) is available", Severity.INFO)
             return True, ["docker", "compose"]
     except Exception:
         pass
@@ -76,12 +77,12 @@ def check_docker_compose():
         )
         
         if result.returncode == 0:
-            show_message(Severity.INFO, "Docker Compose (V1) is available")
+            messages.show_message("Docker Compose (V1) is available", Severity.INFO)
             return True, ["docker-compose"]
     except Exception:
         pass
         
-    show_message(Severity.FATAL, "Docker Compose is not available")
+    messages.show_message("Docker Compose is not available", Severity.FATAL)
     print("Please install Docker Compose: https://docs.docker.com/compose/install/")
     return False, None
 
@@ -92,26 +93,26 @@ def clean_environment(compose_cmd, remove_env=False):
     script_dir = pathlib.Path(__file__).parent.absolute()
     
     try:
-        show_message(Severity.WARN, "Cleaning up Docker environment...")
+        messages.show_message("Cleaning up Docker environment...", Severity.WARN)
         result = subprocess.run(
             compose_cmd + ["-f", str(script_dir / "docker-compose.yml"), "down", "--remove-orphans", "-v"],
             check=False
         )
         
         if result.returncode == 0:
-            show_message(Severity.INFO, "Docker environment cleaned successfully")
+            messages.show_message("Docker environment cleaned successfully", Severity.INFO)
         else:
-            show_message(Severity.WARN, f"Docker environment cleanup exited with code: {result.returncode}")
+            messages.show_message(f"Docker environment cleanup exited with code: {result.returncode}", Severity.WARN)
         
         # Remove .env file if force-clean option is used
         if remove_env:
             env_file = script_dir / ".env"
             if env_file.exists():
                 env_file.unlink()
-                show_message(Severity.INFO, ".env file removed")
+                messages.show_message(".env file removed", Severity.INFO)
     
     except Exception as e:
-        show_message(Severity.WARN, f"Error during cleanup: {e}")
+        messages.show_message(f"Error during cleanup: {e}", Severity.WARN)
 
 
 def ensure_env_file():
@@ -122,21 +123,21 @@ def ensure_env_file():
     env_example = script_dir / ".env.example"
 
     if env_file.exists():
-        show_message(Severity.INFO, ".env file exists")
+        messages.show_message(".env file exists", Severity.INFO)
         return True
     
     if not env_example.exists():
-        show_message(Severity.FATAL, "Neither .env nor .env.example file found")
+        messages.show_message("Neither .env nor .env.example file found", Severity.FATAL)
         return False
     
     try:
         # Copy .env.example to .env
         shutil.copy2(env_example, env_file)
-        show_message(Severity.INFO, "Created .env file from .env.example")
-        show_message(Severity.WARN, "You may want to edit .env file to customize settings")
+        messages.show_message("Created .env file from .env.example", Severity.INFO)
+        messages.show_message("You may want to edit .env file to customize settings", Severity.WARN)
         return True
     except Exception as e:
-        show_message(Severity.FATAL, f"Error creating .env file: {e}")
+        messages.show_message(f"Error creating .env file: {e}", Severity.FATAL)
         return False
 
 
@@ -147,21 +148,21 @@ def run_docker_compose(compose_cmd):
     
     try:
         # Run docker-compose up with detached mode
-        show_message(Severity.COOL, "Starting Docker containers...")
+        messages.show_message("Starting Docker containers...", Severity.COOL)
         result = subprocess.run(
             compose_cmd + ["-f", str(script_dir / "docker-compose.yml"), "up", "-d"],
             check=False
         )
         
         if result.returncode == 0:
-            show_message(Severity.INFO, "Docker containers started successfully")
+            messages.show_message("Docker containers started successfully", Severity.INFO)
             return True
         else:
-            show_message(Severity.FATAL, f"Failed to start Docker containers (exit code: {result.returncode})")
+            messages.show_message(f"Failed to start Docker containers (exit code: {result.returncode})", Severity.FATAL)
             return False
             
     except Exception as e:
-        show_message(Severity.FATAL, f"Error running Docker Compose: {e}")
+        messages.show_message(f"Error running Docker Compose: {e}", Severity.FATAL)
         return False
 
 
@@ -200,7 +201,7 @@ def main():
     if not run_docker_compose(compose_cmd):
         sys.exit(1)
     
-    show_message(Severity.INFO, "Setup completed successfully")
+    messages.show_message("Setup completed successfully", Severity.INFO)
     sys.exit(0)
 
 
