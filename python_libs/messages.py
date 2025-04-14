@@ -3,12 +3,6 @@
 from enum import Enum
 from types import MappingProxyType
 
-class Severity(Enum):
-    COOL     = 1
-    INFO     = 2
-    WARN     = 3
-    FATAL    = 4
-
 class Colors():
     _COLORS = {
         "NONE": "",
@@ -31,16 +25,17 @@ class Styles(Enum):
     COLORS  = 1
     ICONS   = 2
 
-SeverityInfo = {
-        Severity.COOL:     {"icon": "🚀", "label": "[INFO] ",    "color": "GREEN"},
-        Severity.INFO:     {"icon": "✅", "label": "[INFO] ",    "color": "NONE"},
-        Severity.WARN:     {"icon": "⚠️", "label": "[WARNING] ", "color": "YELLOW"},
-        Severity.FATAL:    {"icon": "❌", "label": "[FATAL] ",   "color": "RED"}
+class Severity():
+    levels = {
+        'COOL':     {"icon": "🚀", "label": "[INFO] ",    "color": "GREEN"},
+        'INFO':     {"icon": "✅", "label": "[INFO] ",    "color": "NONE"},
+        'WARN':     {"icon": "⚠️", "label": "[WARNING] ", "color": "YELLOW"},
+        'FATAL':    {"icon": "❌", "label": "[FATAL] ",   "color": "RED"}
     }
 
 class Messages():
     defaults = {
-        "severity_level": Severity.INFO,
+        "severity_level": 'INFO',
         "style": Styles.ICONS
     }
 
@@ -48,11 +43,11 @@ class Messages():
         if style == Styles.PLAIN:
             print(message)
         elif style == Styles.COLORS:
-            color_start = Colors.getCode(SeverityInfo[severity_level]["color"])
+            color_start = Colors.getCode(Severity.levels[severity_level]["color"])
             color_end = Colors.getCode("RESET")
             print(color_start + message + color_end)
         elif style == Styles.ICONS:
-            print(SeverityInfo[severity_level]["icon"] + " " + message)
+            print(Severity.levels[severity_level]["icon"] + " " + message)
 
     def show_message(
             self,
@@ -65,17 +60,10 @@ class Messages():
             severity_level = self.defaults["severity_level"]
         if style is None:
             style = self.defaults["style"]
-        # If severity_level is not declared in Severity, something is wrong,
-        # so we emit a warning.
-        # But we don't return, because we might still be able to print the
-        # original message.
-        if not isinstance(severity_level, Severity):
+        # If the specified severity_level doesn't exist,
+        # we'll print a warning and then we print the message as is.
+        if severity_level not in Severity.levels:
             print(f"⚠️ Undeclared severity level: {severity_level}")
-        # If severity_level is not in SecurityInfo, we print a warning
-        # and then we print the message as is.
-        # This might mean that we have two warnings, which is intended.
-        if severity_level not in SeverityInfo:
-            print(f"⚠️ Unhandled severity level: {severity_level}")
             print(message)
             return False
         else:
