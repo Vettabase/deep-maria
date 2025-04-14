@@ -20,10 +20,10 @@ import pathlib
 import argparse
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../python_libs')))
-from messages import Messages
+from messages import Messages, Severity
 
-# Initialize Messages class
-messages = Messages()
+severity = Severity()
+messages = Messages(severity)
 
 def check_docker():
     """Check if Docker is installed and available."""

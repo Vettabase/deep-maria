@@ -33,21 +33,44 @@ class Severity():
         'FATAL':    {"icon": "❌", "label": "[FATAL] ",   "color": "RED"}
     }
 
+    def add_level(self, id, icon, label, color):
+        self.levels[id] = {"icon": icon, "label": label, "color": color}
+
+    def remove_level(self, id):
+        del self.levels[id]
+
+    def set_default_level(self, id = None):
+        if id is None:
+            Messages.defaults["severity_level"] = None
+            return self
+
+        if id not in self.levels:
+            raise Exception(f"Severity level does not exist: {id}")
+
+        Messages.defaults["severity_level"] = id
+        return self
+
+    def get_default_level(self):
+        return Messages.defaults["severity_level"]
+
 class Messages():
     defaults = {
         "severity_level": 'INFO',
         "style": Styles.ICONS
     }
 
+    def __init__(self, severity):
+        self.severity = severity
+
     def print_message(self, message, severity_level, style):
         if style == Styles.PLAIN:
             print(message)
         elif style == Styles.COLORS:
-            color_start = Colors.getCode(Severity.levels[severity_level]["color"])
+            color_start = Colors.getCode(self.severity.levels[severity_level]["color"])
             color_end = Colors.getCode("RESET")
             print(color_start + message + color_end)
         elif style == Styles.ICONS:
-            print(Severity.levels[severity_level]["icon"] + " " + message)
+            print(self.severity.levels[severity_level]["icon"] + " " + message)
 
     def show_message(
             self,
@@ -62,7 +85,7 @@ class Messages():
             style = self.defaults["style"]
         # If the specified severity_level doesn't exist,
         # we'll print a warning and then we print the message as is.
-        if severity_level not in Severity.levels:
+        if severity_level not in self.severity.levels:
             print(f"⚠️ Undeclared severity level: {severity_level}")
             print(message)
             return False
