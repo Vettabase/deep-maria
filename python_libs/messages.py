@@ -90,7 +90,7 @@ class Messages():
 
     def __new__(cls):
         if cls._instance_created:
-            raise Exception("Severity is a singleton")
+            raise Exception("Messages is a singleton")
 
         cls._instance_created = True
         instance = super(Messages, cls).__new__(cls)
